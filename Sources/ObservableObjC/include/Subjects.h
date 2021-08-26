@@ -33,4 +33,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, readonly) OOCObservable observable;
 @end
 
+@interface OOCBehaviorSubject : NSObject
+- (instancetype)initWithInitialValue:(id)value;
+
+@property(nonatomic, strong) id value;
+@property(nonatomic, copy, readonly) OOCObserver send;
+@property(nonatomic, copy, readonly) OOCObservable observable;
+@end
+
 NS_ASSUME_NONNULL_END

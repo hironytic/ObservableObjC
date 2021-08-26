@@ -68,3 +68,51 @@
 }
 
 @end
+
+// MARK: - OOCBehaviourSubject
+
+@interface OOCBehaviorSubject ()
+@property(nonatomic, strong) OOCPublishSubject *publisher;
+@property(nonatomic, strong) id currentValue;
+@end
+
+@implementation OOCBehaviorSubject
+
+-(instancetype)init {
+    return [self initWithInitialValue:[NSNull null]];
+}
+
+-(instancetype)initWithInitialValue:(id)value {
+    self = [super init];
+    if (self != nil) {
+        OOCBehaviorSubject * __weak weakSelf = self;
+        
+        _currentValue = value;
+        _publisher = [OOCPublishSubject new];
+        
+        _send = ^(id nextValue) {
+            if (weakSelf == nil) { return; }
+            
+            weakSelf.value = nextValue;
+        };
+        
+        _observable = ^(OOCObserver observer) {
+            if (weakSelf == nil) { return ^{}; }
+            
+            observer(weakSelf.currentValue);
+            return weakSelf.publisher.observable(observer);
+        };
+    }
+    return self;
+}
+
+- (id)value {
+    return self.currentValue;
+}
+
+- (void)setValue:(id)value {
+    self.currentValue = value;
+    self.publisher.send(value);
+}
+
+@end

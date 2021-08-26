@@ -64,4 +64,49 @@
     XCTAssertEqualObjects(values, expected2);
 }
 
+- (void)testBehaviorSubject {
+    NSMutableArray *values1 = [NSMutableArray new];
+    NSMutableArray *values2 = [NSMutableArray new];
+    
+    OOCBehaviorSubject *subject = [[OOCBehaviorSubject alloc] initWithInitialValue:@20];
+    
+    OOCCancellable cancellable1 = subject.observable(^(id value) {
+        [values1 addObject:value];
+    });
+
+    NSArray *expected1 = @[@20];
+    XCTAssertEqualObjects(values1, expected1);
+    
+    subject.value = @40;
+
+    NSArray *expected2 = @[@20, @40];
+    XCTAssertEqualObjects(values1, expected2);
+
+    OOCCancellable cancellable2 = subject.observable(^(id value) {
+        [values2 addObject:value];
+    });
+
+    NSArray *expected3 = @[@40];
+    XCTAssertEqualObjects(values2, expected3);
+
+    subject.send(@60);
+    
+    NSArray *expected4 = @[@20, @40, @60];
+    XCTAssertEqualObjects(values1, expected4);
+    NSArray *expected5 = @[@40, @60];
+    XCTAssertEqualObjects(values2, expected5);
+
+    cancellable1();
+    
+    subject.value = @80;
+    
+    XCTAssertEqualObjects(values1, expected4);
+    NSArray *expected6 = @[@40, @60, @80];
+    XCTAssertEqualObjects(values2, expected6);
+
+    XCTAssertEqualObjects(subject.value, @80);
+
+    cancellable2();
+}
+
 @end
