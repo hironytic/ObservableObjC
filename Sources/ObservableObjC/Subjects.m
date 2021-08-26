@@ -28,7 +28,7 @@
 
 @interface OOCPublishSubject ()
 @property(nonatomic, strong) OOCObserverList *observerList;
-@property(nonatomic, assign) BOOL finished;
+@property(nonatomic, assign) id terminatedBy;
 @end
 
 @implementation OOCPublishSubject
@@ -39,27 +39,31 @@
         OOCPublishSubject * __weak weakSelf = self;
         
         _observerList = [OOCObserverList new];
+        _terminatedBy = nil;
         
         _send = ^(id value) {
             if (weakSelf == nil) { return; }
-            if (weakSelf.finished) { return; }
+            if (weakSelf.terminatedBy != nil) { return; }
             
             [weakSelf.observerList sendToAllObservers:value];
-            if ([value isKindOfClass:[OOCCompleted class]] || [value isKindOfClass:[NSError class]]) {
-                weakSelf.finished = YES;
+            if (OOCIsTerminator(value)) {
+                weakSelf.terminatedBy = value;
                 [weakSelf.observerList removeAllObservers];
             }
         };
         
         _observable = ^(OOCObserver observer) {
-            if (weakSelf != nil && !weakSelf.finished) {
+            if (weakSelf == nil) { return ^{}; }
+            
+            if (weakSelf.terminatedBy == nil) {
                 NSUInteger tag = [weakSelf.observerList addObserver:observer];
                 return ^{
-                    if (weakSelf != nil && !weakSelf.finished) {
+                    if (weakSelf != nil && weakSelf.terminatedBy == nil) {
                         [weakSelf.observerList removeObserver:tag];
                     }
                 };
             } else {
+                observer(weakSelf.terminatedBy);
                 return ^{};
             }
         };
@@ -100,7 +104,11 @@
             if (weakSelf == nil) { return ^{}; }
             
             observer(weakSelf.currentValue);
-            return weakSelf.publisher.observable(observer);
+            if (OOCIsTerminator(weakSelf.currentValue)) {
+                return ^{};
+            } else {
+                return weakSelf.publisher.observable(observer);
+            }
         };
     }
     return self;
@@ -111,6 +119,10 @@
 }
 
 - (void)setValue:(id)value {
+    if (OOCIsTerminator(self.currentValue)) {
+        return;
+    }
+    
     self.currentValue = value;
     self.publisher.send(value);
 }

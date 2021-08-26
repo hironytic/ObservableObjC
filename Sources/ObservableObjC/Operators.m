@@ -29,7 +29,7 @@ OOCOperator OOCMap(id (^proc)(id value)) {
     return ^(OOCObservable observable) {
         return ^(OOCObserver observer) {
             return observable(^(id value) {
-                if ([value isKindOfClass:[OOCCompleted class]] || [value isKindOfClass:[NSError class]]) {
+                if (OOCIsTerminator(value)) {
                     observer(value);
                 } else {
                     observer(proc(value));
@@ -43,7 +43,7 @@ OOCOperator OOCFilter(BOOL (^proc)(id value)) {
     return ^(OOCObservable observable) {
         return ^(OOCObserver observer) {
             return observable(^(id value) {
-                if ([value isKindOfClass:[OOCCompleted class]] || proc(value)) {
+                if (OOCIsTerminator(value) || proc(value)) {
                     observer(value);
                 }
             });

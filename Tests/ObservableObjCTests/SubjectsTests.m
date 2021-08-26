@@ -26,6 +26,9 @@
 #import <XCTest/XCTest.h>
 @import ObservableObjC;
 
+#define TestErrorDomain (@"TestErrorDomain")
+#define TestError1  (100)
+
 @interface SubjectsTests : XCTestCase
 
 @end
@@ -62,6 +65,46 @@
     
     subject.send(@20);
     XCTAssertEqualObjects(values, expected2);
+}
+
+- (void)testPublishSubjectCompleted {
+    NSMutableArray *values = [NSMutableArray new];
+    OOCPublishSubject *subject = [OOCPublishSubject new];
+    
+    subject.send([OOCCompleted sharedCompleted]);
+    
+    OOCCancellable cancellable = subject.observable(^(id value) {
+        [values addObject:value];
+    });
+    
+    NSArray *expected1 = @[[OOCCompleted sharedCompleted]];
+    XCTAssertEqualObjects(values, expected1);
+    
+    subject.send(@10);
+    
+    XCTAssertEqualObjects(values, expected1);
+    
+    cancellable();
+}
+
+- (void)testPublishSubjectError {
+    NSMutableArray *values = [NSMutableArray new];
+    OOCPublishSubject *subject = [OOCPublishSubject new];
+    
+    subject.send([NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]);
+    
+    OOCCancellable cancellable = subject.observable(^(id value) {
+        [values addObject:value];
+    });
+    
+    NSArray *expected1 = @[[NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]];
+    XCTAssertEqualObjects(values, expected1);
+    
+    subject.send(@10);
+    
+    XCTAssertEqualObjects(values, expected1);
+
+    cancellable();
 }
 
 - (void)testBehaviorSubject {
@@ -107,6 +150,48 @@
     XCTAssertEqualObjects(subject.value, @80);
 
     cancellable2();
+}
+
+- (void)testBehaviorSubjectCompleted {
+    NSMutableArray *values = [NSMutableArray new];
+    OOCBehaviorSubject *subject = [[OOCBehaviorSubject alloc] initWithInitialValue:@20];
+
+    subject.send([OOCCompleted sharedCompleted]);
+    
+    OOCCancellable cancellable = subject.observable(^(id value) {
+        [values addObject:value];
+    });
+    
+    NSArray *expected1 = @[[OOCCompleted sharedCompleted]];
+    XCTAssertEqualObjects(values, expected1);
+    
+    subject.value = @10;
+    
+    XCTAssertEqualObjects(values, expected1);
+    XCTAssertEqualObjects(subject.value, [OOCCompleted sharedCompleted]);
+    
+    cancellable();
+}
+
+- (void)testBehaviorSubjectError {
+    NSMutableArray *values = [NSMutableArray new];
+    OOCBehaviorSubject *subject = [[OOCBehaviorSubject alloc] initWithInitialValue:@20];
+    
+    subject.send([NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]);
+    
+    OOCCancellable cancellable = subject.observable(^(id value) {
+        [values addObject:value];
+    });
+    
+    NSArray *expected1 = @[[NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]];
+    XCTAssertEqualObjects(values, expected1);
+    
+    subject.value = @10;
+    
+    XCTAssertEqualObjects(values, expected1);
+    XCTAssertEqualObjects(subject.value, [NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]);
+
+    cancellable();
 }
 
 @end

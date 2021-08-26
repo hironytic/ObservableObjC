@@ -49,3 +49,7 @@
 }
 
 @end
+
+BOOL OOCIsTerminator(id value) {
+    return ([value isKindOfClass:[OOCCompleted class]] || [value isKindOfClass:[NSError class]]);
+}

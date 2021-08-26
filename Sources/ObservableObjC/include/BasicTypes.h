@@ -36,4 +36,6 @@ typedef OOCObservable _Nonnull (^OOCOperator)(OOCObservable observable);
 + (instancetype)sharedCompleted;
 @end
 
+BOOL OOCIsTerminator(id value);
+
 NS_ASSUME_NONNULL_END
