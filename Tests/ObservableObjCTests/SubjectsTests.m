@@ -1,5 +1,5 @@
 //
-// ObservableObjC.h
+// SubjectsTests.m
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,7 +23,45 @@
 // THE SOFTWARE.
 //
 
-#import "BasicTypes.h"
-#import "Observables.h"
-#import "Operators.h"
-#import "Subjects.h"
+#import <XCTest/XCTest.h>
+@import ObservableObjC;
+
+@interface SubjectsTests : XCTestCase
+
+@end
+
+@implementation SubjectsTests
+
+- (void)setUp {
+    // Put setup code here. This method is called before the invocation of each test method in the class.
+}
+
+- (void)tearDown {
+    // Put teardown code here. This method is called after the invocation of each test method in the class.
+}
+
+- (void)testPublishSubject {
+    NSMutableArray *values = [NSMutableArray new];
+    OOCPublishSubject *subject = [OOCPublishSubject new];
+    OOCCancellable cancellable = subject.observable(^(id value) {
+        [values addObject:value];
+    });
+    
+    subject.send(@10);
+    subject.send(@"foo");
+    
+    NSArray *expected1 = @[@10, @"foo"];
+    XCTAssertEqualObjects(values, expected1);
+    
+    subject.send(@"bar");
+
+    NSArray *expected2 = @[@10, @"foo", @"bar"];
+    XCTAssertEqualObjects(values, expected2);
+
+    cancellable();
+    
+    subject.send(@20);
+    XCTAssertEqualObjects(values, expected2);
+}
+
+@end

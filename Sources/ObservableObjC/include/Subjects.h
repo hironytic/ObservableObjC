@@ -1,5 +1,5 @@
 //
-// ObservableObjC.h
+// Subjects.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,7 +23,14 @@
 // THE SOFTWARE.
 //
 
+#import <Foundation/Foundation.h>
 #import "BasicTypes.h"
-#import "Observables.h"
-#import "Operators.h"
-#import "Subjects.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface OOCPublishSubject : NSObject
+@property(nonatomic, copy, readonly) OOCObserver send;
+@property(nonatomic, copy, readonly) OOCObservable observable;
+@end
+
+NS_ASSUME_NONNULL_END

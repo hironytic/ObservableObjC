@@ -1,5 +1,5 @@
 //
-// ObservableObjC.h
+// OOCObserverList.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,7 +23,20 @@
 // THE SOFTWARE.
 //
 
+#import <Foundation/Foundation.h>
 #import "BasicTypes.h"
-#import "Observables.h"
-#import "Operators.h"
-#import "Subjects.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+#define OOC_INVALID_OBSERVER_LIST_TAG   (0U)
+
+@interface OOCObserverList : NSObject
+
+- (NSUInteger)addObserver:(OOCObserver)observer;
+- (void)removeObserver:(NSUInteger)tag;
+- (void)removeAllObservers;
+- (void)sendToAllObservers:(id)value;
+
+@end
+
+NS_ASSUME_NONNULL_END
