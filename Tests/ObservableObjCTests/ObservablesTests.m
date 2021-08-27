@@ -42,11 +42,11 @@
 - (void)testPipe {
     NSMutableArray *values = [NSMutableArray new];
     id <OOCObservable> observable = [OOCObservables justWithValue:@100];
-    id <OOCObservable> piped = [observable pipe:@[
-        [OOCOperators map:^(id value) { return @([value intValue] * 2); }],
-        [OOCOperators map:^(id value) { return @([value intValue] + 3); }],
-        [OOCOperators map:^(id value) { return @([value intValue] * 5); }],
-    ]];
+    id <OOCObservable> piped = [observable pipe:^(OOCPipeBuilder *it) {
+        [it map:^(id value) { return @([value intValue] * 2); }];
+        [it map:^(id value) { return @([value intValue] + 3); }];
+        [it map:^(id value) { return @([value intValue] * 5); }];
+    }];
     
     id <OOCCancellable> cancellable = [piped subscribe:^(id value) {
         [values addObject:value];

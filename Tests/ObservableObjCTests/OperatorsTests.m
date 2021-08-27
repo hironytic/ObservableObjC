@@ -42,11 +42,11 @@
 
 - (void)testMap {
     NSMutableArray *values = [NSMutableArray new];
-    id <OOCObservable> observable = [[OOCObservables fromValues:@[@"a", @"b", @"c"]] pipe:@[
-        [OOCOperators map:^(id value) {
+    id <OOCObservable> observable = [[OOCObservables fromValues:@[@"a", @"b", @"c"]] pipe:^(OOCPipeBuilder *it) {
+        [it map:^(id value) {
             return [@"z" stringByAppendingString:value];
-        }],
-    ]];
+        }];
+    }];
     id <OOCCancellable> cancellable = [observable subscribe:^(id value) {
         [values addObject:value];
     }];
@@ -58,11 +58,11 @@
 
 - (void)testFilter {
     NSMutableArray *values = [NSMutableArray new];
-    id <OOCObservable> observable = [[OOCObservables fromValues:@[@10, @20, @30, @40, @50]] pipe:@[
-        [OOCOperators filter:^BOOL (id  _Nonnull value) {
+    id <OOCObservable> observable = [[OOCObservables fromValues:@[@10, @20, @30, @40, @50]] pipe:^(OOCPipeBuilder *it) {
+        [it filter:^BOOL (id  _Nonnull value) {
             return [value intValue] > 25;
-        }],
-    ]];
+        }];
+    }];
     id <OOCCancellable> cancellable = [observable subscribe:^(id value) {
         [values addObject:value];
     }];

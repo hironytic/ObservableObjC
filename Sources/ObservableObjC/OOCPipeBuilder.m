@@ -1,5 +1,5 @@
 //
-// Operators.m
+// OOCPipeBuilder.m
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,7 +23,7 @@
 // THE SOFTWARE.
 //
 
-#import "OOCOperators.h"
+#import "OOCPipeBuilder.h"
 #import "OOCObservables.h"
 
 // MARK: - OOCMap
@@ -70,18 +70,34 @@
 
 // MARK: - OOCOperators
 
-@implementation OOCOperators
+@interface OOCPipeBuilder ()
+@property(nonatomic, strong) NSMutableArray<id <OOCOperator>> *operators;
+@end
 
-+ (id <OOCOperator>)map:(id (^)(id value))proc {
-    OOCMap *operator = [OOCMap new];
-    operator.proc = proc;
-    return operator;
+@implementation OOCPipeBuilder
+
+- (instancetype)init {
+    self = [super init];
+    if (self != nil) {
+        _operators = [NSMutableArray new];
+    }
+    return self;
 }
 
-+ (id <OOCOperator>)filter:(BOOL (^)(id value))proc {
+- (NSArray<id<OOCOperator>> *)build {
+    return self.operators;
+}
+
+- (void)map:(id (^)(id value))proc {
+    OOCMap *operator = [OOCMap new];
+    operator.proc = proc;
+    [self.operators addObject:operator];
+}
+
+- (void)filter:(BOOL (^)(id value))proc {
     OOCFilter *operator = [OOCFilter new];
     operator.proc = proc;
-    return operator;
+    [self.operators addObject:operator];
 }
 
 @end

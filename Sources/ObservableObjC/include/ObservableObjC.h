@@ -25,5 +25,5 @@
 
 #import "BasicTypes.h"
 #import "OOCObservables.h"
-#import "OOCOperators.h"
+#import "OOCPipeBuilder.h"
 #import "Subjects.h"

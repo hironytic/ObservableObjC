@@ -24,6 +24,7 @@
 //
 
 #import "BasicTypes.h"
+#import "OOCPipeBuilder.h"
 
 // MARK: - OOCAnonymousObserver
 
@@ -84,7 +85,12 @@
 
 @implementation OOCObservableBase
 
-- (id <OOCObservable>)pipe:(NSArray<id <OOCOperator>> *)operators {
+- (id <OOCObservable>)pipe:(void (^)(OOCPipeBuilder *))buildBlock {
+    OOCPipeBuilder *builder = [OOCPipeBuilder new];
+    buildBlock(builder);
+    
+    NSArray<id <OOCOperator>> *operators = [builder build];
+    
     id <OOCObservable> result = self;
     for (id <OOCOperator> operator in operators) {
         result = [operator transformFrom:result];

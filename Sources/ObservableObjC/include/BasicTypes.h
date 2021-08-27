@@ -46,9 +46,10 @@ typedef void (^OOCSubscriber)(id value);
 @end
 
 @protocol OOCOperator;
+@class OOCPipeBuilder;
 
 @protocol OOCObservable <NSObject>
-- (id <OOCObservable>)pipe:(NSArray<id <OOCOperator>> *)operators;
+- (id <OOCObservable>)pipe:(void (^)(OOCPipeBuilder *))buildBlock;
 - (id <OOCCancellable>)subscribe:(OOCSubscriber)subscriber;
 - (id <OOCCancellable>)subscribeByObserver:(id <OOCObserver>)observer;
 @end

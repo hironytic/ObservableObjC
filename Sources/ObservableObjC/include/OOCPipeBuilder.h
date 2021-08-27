@@ -1,5 +1,5 @@
 //
-// Operators.h
+// OOCPipeBuilder.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -28,10 +28,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OOCOperators : NSObject
+@interface OOCPipeBuilder : NSObject
 
-+ (id <OOCOperator>)map:(id (^)(id value))proc;
-+ (id <OOCOperator>)filter:(BOOL (^)(id value))proc;
+- (NSArray<id <OOCOperator>> *)build;
+
+- (void)map:(id (^)(id value))proc;
+- (void)filter:(BOOL (^)(id value))proc;
 
 @end
 
