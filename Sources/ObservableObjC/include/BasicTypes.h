@@ -27,14 +27,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^OOCSubscriber)(id value);
-
 @protocol OOCObserver <NSObject>
 - (void)onValue:(id)value;
 @end
 
 @interface OOCAnonymousObserver : NSObject <OOCObserver>
-- (instancetype)initWithSubscriber:(OOCSubscriber)subscriber;
+- (instancetype)initWithSubscriber:(void (^)(id value))subscriber;
 @end
 
 @protocol OOCCancellable <NSObject>
@@ -50,7 +48,7 @@ typedef void (^OOCSubscriber)(id value);
 
 @protocol OOCObservable <NSObject>
 - (id <OOCObservable>)pipe:(void (^)(OOCPipeBuilder *))buildBlock;
-- (id <OOCCancellable>)subscribe:(OOCSubscriber)subscriber;
+- (id <OOCCancellable>)subscribe:(void (^)(id value))subscriber;
 - (id <OOCCancellable>)subscribeByObserver:(id <OOCObserver>)observer;
 @end
 
@@ -65,6 +63,8 @@ typedef void (^OOCSubscriber)(id value);
 + (instancetype)sharedCompleted;
 @end
 
-BOOL OOCIsTerminator(id value);
+@interface NSObject (ObservableObjC)
+- (BOOL)ooc_isTerminator;
+@end
 
 NS_ASSUME_NONNULL_END

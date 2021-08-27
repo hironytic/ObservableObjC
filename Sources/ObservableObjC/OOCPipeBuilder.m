@@ -37,7 +37,7 @@
 - (id <OOCObservable>)transformFrom:(id <OOCObservable>)observable {
     return [OOCObservables create:^(id <OOCObserver> observer) {
         return [observable subscribe:^(id value) {
-            if (OOCIsTerminator(value)) {
+            if ([value ooc_isTerminator]) {
                 [observer onValue:value];
             } else {
                 [observer onValue:self.proc(value)];
@@ -59,7 +59,7 @@
 - (id <OOCObservable>)transformFrom:(id <OOCObservable>)observable {
     return [OOCObservables create:^(id <OOCObserver> observer) {
         return [observable subscribe:^(id value) {
-            if (OOCIsTerminator(value) || self.proc(value)) {
+            if ([value ooc_isTerminator] || self.proc(value)) {
                 [observer onValue:value];
             }
         }];

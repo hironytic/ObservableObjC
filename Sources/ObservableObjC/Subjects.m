@@ -49,7 +49,7 @@
     if (self.terminatedBy != nil) { return; }
     
     [self.observerList sendToAllObservers:value];
-    if (OOCIsTerminator(value)) {
+    if ([value ooc_isTerminator]) {
         self.terminatedBy = value;
         [self.observerList removeAllObservers];
     }
@@ -100,7 +100,7 @@
 
 - (id<OOCCancellable>)subscribeByObserver:(id<OOCObserver>)observer {
     [observer onValue:self.currentValue];
-    if (OOCIsTerminator(self.currentValue)) {
+    if ([self.currentValue ooc_isTerminator]) {
         return [OOCAnonymousCancellable new];
     } else {
         return [self.publisher subscribeByObserver:observer];
@@ -112,7 +112,7 @@
 }
 
 - (void)setValue:(id)value {
-    if (OOCIsTerminator(self.currentValue)) {
+    if ([self.currentValue ooc_isTerminator]) {
         return;
     }
 

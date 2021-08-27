@@ -29,7 +29,7 @@
 // MARK: - OOCAnonymousObserver
 
 @interface OOCAnonymousObserver ()
-@property(nonatomic, copy) OOCSubscriber subscriber;
+@property(nonatomic, copy) void (^subscriber)(id value);
 @end
 
 @implementation OOCAnonymousObserver
@@ -38,7 +38,7 @@
     return [self initWithSubscriber:^(id value) {}];
 }
 
-- (instancetype)initWithSubscriber:(OOCSubscriber)subscriber {
+- (instancetype)initWithSubscriber:(void (^)(id value))subscriber {
     self = [super init];
     if (self != nil) {
         _subscriber = subscriber;
@@ -98,7 +98,7 @@
     return result;
 }
 
-- (id <OOCCancellable>)subscribe:(OOCSubscriber)subscriber {
+- (id <OOCCancellable>)subscribe:(void (^)(id value))subscriber {
     return [self subscribeByObserver:[[OOCAnonymousObserver alloc] initWithSubscriber:subscriber]];
 }
 
@@ -135,6 +135,10 @@
 
 @end
 
-BOOL OOCIsTerminator(id value) {
-    return ([value isKindOfClass:[OOCCompleted class]] || [value isKindOfClass:[NSError class]]);
+@implementation NSObject (ObservableObjC)
+
+- (BOOL)ooc_isTerminator {
+    return ([self isKindOfClass:[OOCCompleted class]] || [self isKindOfClass:[NSError class]]);
 }
+
+@end
