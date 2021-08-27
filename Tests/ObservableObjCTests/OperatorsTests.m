@@ -42,32 +42,32 @@
 
 - (void)testMap {
     NSMutableArray *values = [NSMutableArray new];
-    OOCObservable observable = OOCPipe(OOCFrom(@[@"a", @"b", @"c"]), @[
-        OOCMap(^(id value) {
+    id <OOCObservable> observable = [[OOCObservables fromValues:@[@"a", @"b", @"c"]] pipe:@[
+        [OOCOperators map:^(id value) {
             return [@"z" stringByAppendingString:value];
-        }),
-    ]);
-    OOCCancellable cancellable = observable(^(id value) {
+        }],
+    ]];
+    id <OOCCancellable> cancellable = [observable subscribe:^(id value) {
         [values addObject:value];
-    });
-    cancellable();
-    
+    }];
+    [cancellable cancel];
+
     NSArray *expected = @[@"za", @"zb", @"zc", [OOCCompleted sharedCompleted]];
     XCTAssertEqualObjects(values, expected);
 }
 
 - (void)testFilter {
     NSMutableArray *values = [NSMutableArray new];
-    OOCObservable observable = OOCPipe(OOCFrom(@[@10, @20, @30, @40, @50]), @[
-        OOCFilter(^BOOL (id  _Nonnull value) {
+    id <OOCObservable> observable = [[OOCObservables fromValues:@[@10, @20, @30, @40, @50]] pipe:@[
+        [OOCOperators filter:^BOOL (id  _Nonnull value) {
             return [value intValue] > 25;
-        }),
-    ]);
-    OOCCancellable cancellable = observable(^(id value) {
+        }],
+    ]];
+    id <OOCCancellable> cancellable = [observable subscribe:^(id value) {
         [values addObject:value];
-    });
-    cancellable();
-    
+    }];
+    [cancellable cancel];
+
     NSArray *expected = @[@30, @40, @50, [OOCCompleted sharedCompleted]];
     XCTAssertEqualObjects(values, expected);
 }

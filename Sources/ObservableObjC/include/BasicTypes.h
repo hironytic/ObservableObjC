@@ -27,10 +27,38 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^OOCObserver)(id value);
-typedef void (^OOCCancellable)(void);
-typedef OOCCancellable _Nonnull (^OOCObservable)(OOCObserver observer);
-typedef OOCObservable _Nonnull (^OOCOperator)(OOCObservable observable);
+typedef void (^OOCSubscriber)(id value);
+
+@protocol OOCObserver <NSObject>
+- (void)onValue:(id)value;
+@end
+
+@interface OOCAnonymousObserver : NSObject <OOCObserver>
+- (instancetype)initWithSubscriber:(OOCSubscriber)subscriber;
+@end
+
+@protocol OOCCancellable <NSObject>
+- (void)cancel;
+@end
+
+@interface OOCAnonymousCancellable : NSObject <OOCCancellable>
+- (instancetype)initWithHandler:(void (^)(void))handler;
+@end
+
+@protocol OOCOperator;
+
+@protocol OOCObservable <NSObject>
+- (id <OOCObservable>)pipe:(NSArray<id <OOCOperator>> *)operators;
+- (id <OOCCancellable>)subscribe:(OOCSubscriber)subscriber;
+- (id <OOCCancellable>)subscribeByObserver:(id <OOCObserver>)observer;
+@end
+
+@interface OOCObservableBase : NSObject <OOCObservable>
+@end
+
+@protocol OOCOperator <NSObject>
+- (id <OOCObservable>)transformFrom:(id <OOCObservable>)observable;
+@end
 
 @interface OOCCompleted : NSObject
 + (instancetype)sharedCompleted;

@@ -26,9 +26,12 @@
 #import "Subjects.h"
 #import "OOCObserverList.h"
 
+// MARK: - OOCPublishSubject
+
 @interface OOCPublishSubject ()
 @property(nonatomic, strong) OOCObserverList *observerList;
-@property(nonatomic, assign) id terminatedBy;
+@property(nonatomic, strong) id terminatedBy;
+
 @end
 
 @implementation OOCPublishSubject
@@ -36,39 +39,35 @@
 - (instancetype)init {
     self = [super init];
     if (self != nil) {
-        OOCPublishSubject * __weak weakSelf = self;
-        
         _observerList = [OOCObserverList new];
         _terminatedBy = nil;
-        
-        _send = ^(id value) {
-            if (weakSelf == nil) { return; }
-            if (weakSelf.terminatedBy != nil) { return; }
-            
-            [weakSelf.observerList sendToAllObservers:value];
-            if (OOCIsTerminator(value)) {
-                weakSelf.terminatedBy = value;
-                [weakSelf.observerList removeAllObservers];
-            }
-        };
-        
-        _observable = ^(OOCObserver observer) {
-            if (weakSelf == nil) { return ^{}; }
-            
-            if (weakSelf.terminatedBy == nil) {
-                NSUInteger tag = [weakSelf.observerList addObserver:observer];
-                return ^{
-                    if (weakSelf != nil && weakSelf.terminatedBy == nil) {
-                        [weakSelf.observerList removeObserver:tag];
-                    }
-                };
-            } else {
-                observer(weakSelf.terminatedBy);
-                return ^{};
-            }
-        };
     }
     return self;
+}
+
+- (void)onValue:(id)value {
+    if (self.terminatedBy != nil) { return; }
+    
+    [self.observerList sendToAllObservers:value];
+    if (OOCIsTerminator(value)) {
+        self.terminatedBy = value;
+        [self.observerList removeAllObservers];
+    }
+}
+
+- (id<OOCCancellable>)subscribeByObserver:(id<OOCObserver>)observer {
+    if (self.terminatedBy == nil) {
+        [self.observerList addObserver:observer];
+        OOCPublishSubject * __weak weakSelf = self;
+        return [[OOCAnonymousCancellable alloc] initWithHandler:^{
+            if (weakSelf != nil && weakSelf.terminatedBy == nil) {
+                [weakSelf.observerList removeObserver:observer];
+            }
+        }];
+    } else {
+        [observer onValue:self.terminatedBy];
+        return [OOCAnonymousCancellable new];
+    }
 }
 
 @end
@@ -89,29 +88,23 @@
 -(instancetype)initWithInitialValue:(id)value {
     self = [super init];
     if (self != nil) {
-        OOCBehaviorSubject * __weak weakSelf = self;
-        
         _currentValue = value;
         _publisher = [OOCPublishSubject new];
-        
-        _send = ^(id nextValue) {
-            if (weakSelf == nil) { return; }
-            
-            weakSelf.value = nextValue;
-        };
-        
-        _observable = ^(OOCObserver observer) {
-            if (weakSelf == nil) { return ^{}; }
-            
-            observer(weakSelf.currentValue);
-            if (OOCIsTerminator(weakSelf.currentValue)) {
-                return ^{};
-            } else {
-                return weakSelf.publisher.observable(observer);
-            }
-        };
     }
     return self;
+}
+
+- (void)onValue:(id)value {
+    self.value = value;
+}
+
+- (id<OOCCancellable>)subscribeByObserver:(id<OOCObserver>)observer {
+    [observer onValue:self.currentValue];
+    if (OOCIsTerminator(self.currentValue)) {
+        return [OOCAnonymousCancellable new];
+    } else {
+        return [self.publisher subscribeByObserver:observer];
+    }
 }
 
 - (id)value {
@@ -122,9 +115,9 @@
     if (OOCIsTerminator(self.currentValue)) {
         return;
     }
-    
+
     self.currentValue = value;
-    self.publisher.send(value);
+    [self.publisher onValue:value];
 }
 
 @end

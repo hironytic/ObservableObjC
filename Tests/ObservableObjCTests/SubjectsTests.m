@@ -46,152 +46,152 @@
 - (void)testPublishSubject {
     NSMutableArray *values = [NSMutableArray new];
     OOCPublishSubject *subject = [OOCPublishSubject new];
-    OOCCancellable cancellable = subject.observable(^(id value) {
+    id <OOCCancellable> cancellable = [subject subscribe:^(id value) {
         [values addObject:value];
-    });
-    
-    subject.send(@10);
-    subject.send(@"foo");
-    
+    }];
+
+    [subject onValue:@10];
+    [subject onValue:@"foo"];
+
     NSArray *expected1 = @[@10, @"foo"];
     XCTAssertEqualObjects(values, expected1);
-    
-    subject.send(@"bar");
+
+    [subject onValue:@"bar"];
 
     NSArray *expected2 = @[@10, @"foo", @"bar"];
     XCTAssertEqualObjects(values, expected2);
 
-    cancellable();
-    
-    subject.send(@20);
+    [cancellable cancel];
+   
+    [subject onValue:@20];
     XCTAssertEqualObjects(values, expected2);
 }
 
 - (void)testPublishSubjectCompleted {
     NSMutableArray *values = [NSMutableArray new];
     OOCPublishSubject *subject = [OOCPublishSubject new];
-    
-    subject.send([OOCCompleted sharedCompleted]);
-    
-    OOCCancellable cancellable = subject.observable(^(id value) {
+
+    [subject onValue:[OOCCompleted sharedCompleted]];
+
+    id <OOCCancellable> cancellable = [subject subscribe:^(id value) {
         [values addObject:value];
-    });
-    
+    }];
+
     NSArray *expected1 = @[[OOCCompleted sharedCompleted]];
     XCTAssertEqualObjects(values, expected1);
-    
-    subject.send(@10);
-    
+
+    [subject onValue:@10];
+
     XCTAssertEqualObjects(values, expected1);
-    
-    cancellable();
+
+    [cancellable cancel];
 }
 
 - (void)testPublishSubjectError {
     NSMutableArray *values = [NSMutableArray new];
     OOCPublishSubject *subject = [OOCPublishSubject new];
-    
-    subject.send([NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]);
-    
-    OOCCancellable cancellable = subject.observable(^(id value) {
+
+    [subject onValue:[NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]];
+
+    id <OOCCancellable> cancellable = [subject subscribe:^(id value) {
         [values addObject:value];
-    });
-    
+    }];
+
     NSArray *expected1 = @[[NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]];
     XCTAssertEqualObjects(values, expected1);
-    
-    subject.send(@10);
-    
+
+    [subject onValue:@10];
+
     XCTAssertEqualObjects(values, expected1);
 
-    cancellable();
+    [cancellable cancel];
 }
 
 - (void)testBehaviorSubject {
     NSMutableArray *values1 = [NSMutableArray new];
     NSMutableArray *values2 = [NSMutableArray new];
-    
+
     OOCBehaviorSubject *subject = [[OOCBehaviorSubject alloc] initWithInitialValue:@20];
-    
-    OOCCancellable cancellable1 = subject.observable(^(id value) {
+
+    id <OOCCancellable> cancellable1 = [subject subscribe:^(id value) {
         [values1 addObject:value];
-    });
+    }];
 
     NSArray *expected1 = @[@20];
     XCTAssertEqualObjects(values1, expected1);
-    
+
     subject.value = @40;
 
     NSArray *expected2 = @[@20, @40];
     XCTAssertEqualObjects(values1, expected2);
 
-    OOCCancellable cancellable2 = subject.observable(^(id value) {
+    id <OOCCancellable> cancellable2 = [subject subscribe:^(id value) {
         [values2 addObject:value];
-    });
+    }];
 
     NSArray *expected3 = @[@40];
     XCTAssertEqualObjects(values2, expected3);
 
-    subject.send(@60);
-    
+    [subject onValue:@60];
+
     NSArray *expected4 = @[@20, @40, @60];
     XCTAssertEqualObjects(values1, expected4);
     NSArray *expected5 = @[@40, @60];
     XCTAssertEqualObjects(values2, expected5);
 
-    cancellable1();
-    
+    [cancellable1 cancel];
+
     subject.value = @80;
-    
+
     XCTAssertEqualObjects(values1, expected4);
     NSArray *expected6 = @[@40, @60, @80];
     XCTAssertEqualObjects(values2, expected6);
 
     XCTAssertEqualObjects(subject.value, @80);
 
-    cancellable2();
+    [cancellable2 cancel];
 }
 
 - (void)testBehaviorSubjectCompleted {
     NSMutableArray *values = [NSMutableArray new];
     OOCBehaviorSubject *subject = [[OOCBehaviorSubject alloc] initWithInitialValue:@20];
 
-    subject.send([OOCCompleted sharedCompleted]);
-    
-    OOCCancellable cancellable = subject.observable(^(id value) {
+    [subject onValue:[OOCCompleted sharedCompleted]];
+
+    id <OOCCancellable> cancellable = [subject subscribe:^(id value) {
         [values addObject:value];
-    });
-    
+    }];
+
     NSArray *expected1 = @[[OOCCompleted sharedCompleted]];
     XCTAssertEqualObjects(values, expected1);
-    
+
     subject.value = @10;
-    
+
     XCTAssertEqualObjects(values, expected1);
     XCTAssertEqualObjects(subject.value, [OOCCompleted sharedCompleted]);
-    
-    cancellable();
+
+    [cancellable cancel];
 }
 
 - (void)testBehaviorSubjectError {
     NSMutableArray *values = [NSMutableArray new];
     OOCBehaviorSubject *subject = [[OOCBehaviorSubject alloc] initWithInitialValue:@20];
-    
-    subject.send([NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]);
-    
-    OOCCancellable cancellable = subject.observable(^(id value) {
+
+    [subject onValue:[NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]];
+
+    id <OOCCancellable> cancellable = [subject subscribe:^(id value) {
         [values addObject:value];
-    });
-    
+    }];
+
     NSArray *expected1 = @[[NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]];
     XCTAssertEqualObjects(values, expected1);
-    
+
     subject.value = @10;
-    
+
     XCTAssertEqualObjects(values, expected1);
     XCTAssertEqualObjects(subject.value, [NSError errorWithDomain:TestErrorDomain code:TestError1 userInfo:nil]);
 
-    cancellable();
+    [cancellable cancel];
 }
 
 @end

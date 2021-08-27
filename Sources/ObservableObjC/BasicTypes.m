@@ -25,6 +25,85 @@
 
 #import "BasicTypes.h"
 
+// MARK: - OOCAnonymousObserver
+
+@interface OOCAnonymousObserver ()
+@property(nonatomic, copy) OOCSubscriber subscriber;
+@end
+
+@implementation OOCAnonymousObserver
+
+- (instancetype)init {
+    return [self initWithSubscriber:^(id value) {}];
+}
+
+- (instancetype)initWithSubscriber:(OOCSubscriber)subscriber {
+    self = [super init];
+    if (self != nil) {
+        _subscriber = subscriber;
+    }
+    return self;
+}
+
+- (void)onValue:(id)value {
+    _subscriber(value);
+}
+
+@end
+
+// MARK: - OOCAnonymousCancellable
+
+@interface OOCAnonymousCancellable ()
+@property(nonatomic, copy) void (^handler)(void);
+@end
+
+@implementation OOCAnonymousCancellable
+
+- (instancetype)init {
+    return [self initWithHandler:^{}];
+}
+
+- (instancetype)initWithHandler:(void (^)(void))handler {
+    self = [super init];
+    if (self != nil) {
+        _handler = handler;
+    }
+    return self;
+}
+
+- (void)cancel {
+    _handler();
+}
+
+@end
+
+// MARK: - OOCObservableBase
+
+@interface OOCObservableBase ()
+@end
+
+@implementation OOCObservableBase
+
+- (id <OOCObservable>)pipe:(NSArray<id <OOCOperator>> *)operators {
+    id <OOCObservable> result = self;
+    for (id <OOCOperator> operator in operators) {
+        result = [operator transformFrom:result];
+    }
+    return result;
+}
+
+- (id <OOCCancellable>)subscribe:(OOCSubscriber)subscriber {
+    return [self subscribeByObserver:[[OOCAnonymousObserver alloc] initWithSubscriber:subscriber]];
+}
+
+- (id <OOCCancellable>)subscribeByObserver:(id <OOCObserver>)observer {
+    return [OOCAnonymousCancellable new];
+}
+
+@end
+
+// MARK: - OOCCompleted
+
 @implementation OOCCompleted
 
 + (instancetype)sharedCompleted {

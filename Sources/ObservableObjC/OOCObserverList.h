@@ -32,8 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface OOCObserverList : NSObject
 
-- (NSUInteger)addObserver:(OOCObserver)observer;
-- (void)removeObserver:(NSUInteger)tag;
+- (void)addObserver:(id <OOCObserver>)observer;
+- (void)removeObserver:(id <OOCObserver>)observer;
 - (void)removeAllObservers;
 - (void)sendToAllObservers:(id)value;
 

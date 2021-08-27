@@ -24,6 +24,6 @@
 //
 
 #import "BasicTypes.h"
-#import "Observables.h"
-#import "Operators.h"
+#import "OOCObservables.h"
+#import "OOCOperators.h"
 #import "Subjects.h"

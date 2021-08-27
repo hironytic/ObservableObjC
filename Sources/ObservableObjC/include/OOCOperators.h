@@ -28,7 +28,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-OOCOperator OOCMap(id (^proc)(id value));
-OOCOperator OOCFilter(BOOL (^proc)(id value));
+@interface OOCOperators : NSObject
+
++ (id <OOCOperator>)map:(id (^)(id value))proc;
++ (id <OOCOperator>)filter:(BOOL (^)(id value))proc;
+
+@end
 
 NS_ASSUME_NONNULL_END

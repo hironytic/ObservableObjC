@@ -25,21 +25,8 @@
 
 #import "OOCObserverList.h"
 
-// MARK: - OOCObserverWithTag
-
-@interface OOCObserverWithTag : NSObject
-@property(nonatomic, copy) OOCObserver observer;
-@property(nonatomic, assign) NSUInteger tag;
-@end
-
-@implementation OOCObserverWithTag
-@end
-
-// MARK: - OOCObserverList
-
 @interface OOCObserverList ()
-@property(nonatomic, assign) NSUInteger lastTag;
-@property(nonatomic, strong) NSMutableArray<OOCObserverWithTag *> *storage;
+@property(nonatomic, strong) NSMutableArray<id <OOCObserver>> *storage;
 @end
 
 @implementation OOCObserverList
@@ -47,31 +34,20 @@
 - (instancetype)init {
     self = [super init];
     if (self != nil) {
-        _lastTag = OOC_INVALID_OBSERVER_LIST_TAG;
         _storage = [NSMutableArray new];
     }
     return self;
 }
 
-- (NSUInteger)addObserver:(OOCObserver)observer {
+- (void)addObserver:(id <OOCObserver>)observer {
     @synchronized (self) {
-        NSUInteger tag = ++_lastTag;
-        OOCObserverWithTag *owt = [OOCObserverWithTag new];
-        owt.observer = observer;
-        owt.tag = tag;
-        [self.storage addObject:owt];
-        return tag;
+        [self.storage addObject:observer];
     }
 }
 
-- (void)removeObserver:(NSUInteger)tag {
+- (void)removeObserver:(id <OOCObserver>)observer {
     @synchronized (self) {
-        NSUInteger index = [self.storage indexOfObjectPassingTest:^BOOL(OOCObserverWithTag * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            return obj.tag == tag;
-        }];
-        if (index != NSNotFound) {
-            [self.storage removeObjectAtIndex:index];
-        }
+        [self.storage removeObject:observer];
     }
 }
 
@@ -82,17 +58,14 @@
 }
 
 - (void)sendToAllObservers:(id)value {
-    NSMutableArray *allObservers;
+    NSArray *allObservers;
     
     @synchronized (self) {
-        allObservers = [[NSMutableArray alloc] initWithCapacity:[self.storage count]];
-        for (OOCObserverWithTag *owt in self.storage) {
-            [allObservers addObject:owt.observer];
-        }
+        allObservers = [self.storage copy];
     }
     
-    for (OOCObserver observer in allObservers) {
-        observer(value);
+    for (id <OOCObserver> observer in allObservers) {
+        [observer onValue:value];
     }
 }
 

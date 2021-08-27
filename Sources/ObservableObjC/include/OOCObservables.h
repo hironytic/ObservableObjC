@@ -1,5 +1,5 @@
 //
-// Operators.m
+// OOCObservables.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,30 +23,15 @@
 // THE SOFTWARE.
 //
 
-#import "Operators.h"
+#import <Foundation/Foundation.h>
+#import "BasicTypes.h"
 
-OOCOperator OOCMap(id (^proc)(id value)) {
-    return ^(OOCObservable observable) {
-        return ^(OOCObserver observer) {
-            return observable(^(id value) {
-                if (OOCIsTerminator(value)) {
-                    observer(value);
-                } else {
-                    observer(proc(value));
-                }
-            });
-        };
-    };
-}
+NS_ASSUME_NONNULL_BEGIN
 
-OOCOperator OOCFilter(BOOL (^proc)(id value)) {
-    return ^(OOCObservable observable) {
-        return ^(OOCObserver observer) {
-            return observable(^(id value) {
-                if (OOCIsTerminator(value) || proc(value)) {
-                    observer(value);
-                }
-            });
-        };
-    };
-}
+@interface OOCObservables : NSObject
++ (id <OOCObservable>)create:(id <OOCCancellable> (^)(id <OOCObserver>))subscribe;
++ (id <OOCObservable>)justWithValue:(id)value;
++ (id <OOCObservable>)fromValues:(NSArray *)values;
+@end
+
+NS_ASSUME_NONNULL_END

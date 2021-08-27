@@ -41,16 +41,17 @@
 
 - (void)testPipe {
     NSMutableArray *values = [NSMutableArray new];
-    OOCObservable observable = OOCJust(@100);
-    OOCObservable piped = OOCPipe(observable, @[
-        OOCMap(^(id value) { return @([value intValue] * 2); }),
-        OOCMap(^(id value) { return @([value intValue] + 3); }),
-        OOCMap(^(id value) { return @([value intValue] * 5); }),
-    ]);
-    OOCCancellable cancellable = piped(^(id value) {
+    id <OOCObservable> observable = [OOCObservables justWithValue:@100];
+    id <OOCObservable> piped = [observable pipe:@[
+        [OOCOperators map:^(id value) { return @([value intValue] * 2); }],
+        [OOCOperators map:^(id value) { return @([value intValue] + 3); }],
+        [OOCOperators map:^(id value) { return @([value intValue] * 5); }],
+    ]];
+    
+    id <OOCCancellable> cancellable = [piped subscribe:^(id value) {
         [values addObject:value];
-    });
-    cancellable();
+    }];
+    [cancellable cancel];
     
     NSArray *expected = @[
         @1015,
@@ -61,12 +62,12 @@
 
 - (void)testJust {
     NSMutableArray *values = [NSMutableArray new];
-    OOCObservable observable = OOCJust(@100);
-    OOCCancellable cancellable = observable(^(id value) {
+    id <OOCObservable> observable = [OOCObservables justWithValue:@100];
+    id <OOCCancellable> cancellable = [observable subscribe:^(id value) {
         [values addObject:value];
-    });
-    cancellable();
-    
+    }];
+    [cancellable cancel];
+
     NSArray *expected = @[
         @100,
         [OOCCompleted sharedCompleted]
@@ -76,12 +77,12 @@
 
 - (void)testFrom {
     NSMutableArray *values = [NSMutableArray new];
-    OOCObservable observable = OOCFrom(@[@1, @2, @3]);
-    OOCCancellable cancellable = observable(^(id value) {
+    id <OOCObservable> observable = [OOCObservables fromValues:@[@1, @2, @3]];
+    id <OOCCancellable> cancellable = [observable subscribe:^(id value) {
         [values addObject:value];
-    });
-    cancellable();
-    
+    }];
+    [cancellable cancel];
+
     NSArray *expected = @[
         @1,
         @2,
