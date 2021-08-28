@@ -1,5 +1,5 @@
 //
-// OOCPipeBuilder.h
+// NSObject+ObservableObjC.m
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,19 +23,13 @@
 // THE SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
+#import "NSObject+ObservableObjC.h"
+#import "OOCCompleted.h"
 
-@protocol OOCOperator;
+@implementation NSObject (ObservableObjC)
 
-NS_ASSUME_NONNULL_BEGIN
-
-@interface OOCPipeBuilder : NSObject
-
-- (NSArray<id <OOCOperator>> *)build;
-
-- (void)map:(id (^)(id value))proc;
-- (void)filter:(BOOL (^)(id value))proc;
+- (BOOL)ooc_isTerminator {
+    return ([self isKindOfClass:[OOCCompleted class]] || [self isKindOfClass:[NSError class]]);
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

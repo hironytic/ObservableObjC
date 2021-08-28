@@ -24,7 +24,11 @@
 //
 
 #import "OOCPipeBuilder.h"
+#import "NSObject+ObservableObjC.h"
+#import "OOCObservable.h"
 #import "OOCObservables.h"
+#import "OOCObserver.h"
+#import "OOCOperator.h"
 
 // MARK: - OOCMap
 

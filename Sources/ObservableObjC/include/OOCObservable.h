@@ -1,5 +1,5 @@
 //
-// OOCPipeBuilder.h
+// OOCObservable.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -25,17 +25,17 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol OOCOperator;
+@protocol OOCCancellable;
+@protocol OOCObservable;
+@protocol OOCObserver;
+@class OOCPipeBuilder;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OOCPipeBuilder : NSObject
-
-- (NSArray<id <OOCOperator>> *)build;
-
-- (void)map:(id (^)(id value))proc;
-- (void)filter:(BOOL (^)(id value))proc;
-
+@protocol OOCObservable <NSObject>
+- (id <OOCObservable>)pipe:(void (^)(OOCPipeBuilder *))buildBlock;
+- (id <OOCCancellable>)subscribe:(void (^)(id value))subscriber;
+- (id <OOCCancellable>)subscribeByObserver:(id <OOCObserver>)observer;
 @end
 
 NS_ASSUME_NONNULL_END

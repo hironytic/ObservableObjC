@@ -1,5 +1,5 @@
 //
-// Subjects.h
+// OOCObserver.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -24,16 +24,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BasicTypes.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OOCPublishSubject : OOCObservableBase <OOCObserver, OOCObservable>
-@end
-
-@interface OOCBehaviorSubject : OOCObservableBase <OOCObserver, OOCObservable>
-- (instancetype)initWithInitialValue:(id)value;
-@property(nonatomic, strong) id value;
+@protocol OOCObserver <NSObject>
+- (void)onValue:(id)value;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -1,5 +1,5 @@
 //
-// BasicTypes.h
+// OOCBehaviorSubject.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -24,47 +24,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "OOCObservableBase.h"
+#import "OOCObserver.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol OOCObserver <NSObject>
-- (void)onValue:(id)value;
-@end
-
-@interface OOCAnonymousObserver : NSObject <OOCObserver>
-- (instancetype)initWithSubscriber:(void (^)(id value))subscriber;
-@end
-
-@protocol OOCCancellable <NSObject>
-- (void)cancel;
-@end
-
-@interface OOCAnonymousCancellable : NSObject <OOCCancellable>
-- (instancetype)initWithHandler:(void (^)(void))handler;
-@end
-
-@protocol OOCOperator;
-@class OOCPipeBuilder;
-
-@protocol OOCObservable <NSObject>
-- (id <OOCObservable>)pipe:(void (^)(OOCPipeBuilder *))buildBlock;
-- (id <OOCCancellable>)subscribe:(void (^)(id value))subscriber;
-- (id <OOCCancellable>)subscribeByObserver:(id <OOCObserver>)observer;
-@end
-
-@interface OOCObservableBase : NSObject <OOCObservable>
-@end
-
-@protocol OOCOperator <NSObject>
-- (id <OOCObservable>)transformFrom:(id <OOCObservable>)observable;
-@end
-
-@interface OOCCompleted : NSObject
-+ (instancetype)sharedCompleted;
-@end
-
-@interface NSObject (ObservableObjC)
-- (BOOL)ooc_isTerminator;
+@interface OOCBehaviorSubject : OOCObservableBase <OOCObserver, OOCObservable>
+- (instancetype)initWithInitialValue:(id)value;
+@property(nonatomic, strong) id value;
 @end
 
 NS_ASSUME_NONNULL_END

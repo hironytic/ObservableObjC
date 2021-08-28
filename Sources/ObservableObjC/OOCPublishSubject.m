@@ -1,5 +1,5 @@
 //
-// OOCObserverList.m
+// OOCPublishSubject.m
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,50 +23,50 @@
 // THE SOFTWARE.
 //
 
+#import "OOCPublishSubject.h"
+#import "NSObject+ObservableObjC.h"
+#import "OOCAnonymousCancellable.h"
 #import "OOCObserverList.h"
-#import "OOCObserver.h"
 
-@interface OOCObserverList ()
-@property(nonatomic, strong) NSMutableArray<id <OOCObserver>> *storage;
+@interface OOCPublishSubject ()
+@property(nonatomic, strong) OOCObserverList *observerList;
+@property(nonatomic, strong) id terminatedBy;
+
 @end
 
-@implementation OOCObserverList
+@implementation OOCPublishSubject
 
 - (instancetype)init {
     self = [super init];
     if (self != nil) {
-        _storage = [NSMutableArray new];
+        _observerList = [OOCObserverList new];
+        _terminatedBy = nil;
     }
     return self;
 }
 
-- (void)addObserver:(id <OOCObserver>)observer {
-    @synchronized (self) {
-        [self.storage addObject:observer];
-    }
-}
-
-- (void)removeObserver:(id <OOCObserver>)observer {
-    @synchronized (self) {
-        [self.storage removeObject:observer];
-    }
-}
-
-- (void)removeAllObservers {
-    @synchronized (self) {
-        [self.storage removeAllObjects];
-    }
-}
-
-- (void)sendToAllObservers:(id)value {
-    NSArray *allObservers;
+- (void)onValue:(id)value {
+    if (self.terminatedBy != nil) { return; }
     
-    @synchronized (self) {
-        allObservers = [self.storage copy];
+    [self.observerList sendToAllObservers:value];
+    if ([value ooc_isTerminator]) {
+        self.terminatedBy = value;
+        [self.observerList removeAllObservers];
     }
-    
-    for (id <OOCObserver> observer in allObservers) {
-        [observer onValue:value];
+}
+
+- (id<OOCCancellable>)subscribeByObserver:(id<OOCObserver>)observer {
+    if (self.terminatedBy == nil) {
+        [self.observerList addObserver:observer];
+        OOCPublishSubject * __weak weakSelf = self;
+        return [[OOCAnonymousCancellable alloc] initWithHandler:^{
+            if (weakSelf != nil && weakSelf.terminatedBy == nil) {
+                [weakSelf.observerList removeObserver:observer];
+            }
+        }];
+    } else {
+        [observer onValue:self.terminatedBy];
+        return [OOCAnonymousCancellable new];
     }
 }
 

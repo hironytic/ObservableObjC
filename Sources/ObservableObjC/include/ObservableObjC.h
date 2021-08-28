@@ -23,7 +23,16 @@
 // THE SOFTWARE.
 //
 
-#import "BasicTypes.h"
+#import "NSObject+ObservableObjC.h"
+#import "OOCAnonymousCancellable.h"
+#import "OOCAnonymousObserver.h"
+#import "OOCBehaviorSubject.h"
+#import "OOCCancellable.h"
+#import "OOCCompleted.h"
+#import "OOCObservable.h"
+#import "OOCObservableBase.h"
 #import "OOCObservables.h"
+#import "OOCObserver.h"
+#import "OOCOperator.h"
 #import "OOCPipeBuilder.h"
-#import "Subjects.h"
+#import "OOCPublishSubject.h"

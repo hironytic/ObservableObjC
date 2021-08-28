@@ -1,5 +1,5 @@
 //
-// OOCPipeBuilder.h
+// OOCAnonymousObserver.m
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,19 +23,28 @@
 // THE SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
+#import "OOCAnonymousObserver.h"
 
-@protocol OOCOperator;
-
-NS_ASSUME_NONNULL_BEGIN
-
-@interface OOCPipeBuilder : NSObject
-
-- (NSArray<id <OOCOperator>> *)build;
-
-- (void)map:(id (^)(id value))proc;
-- (void)filter:(BOOL (^)(id value))proc;
-
+@interface OOCAnonymousObserver ()
+@property(nonatomic, copy) void (^subscriber)(id value);
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation OOCAnonymousObserver
+
+- (instancetype)init {
+    return [self initWithSubscriber:^(id value) {}];
+}
+
+- (instancetype)initWithSubscriber:(void (^)(id value))subscriber {
+    self = [super init];
+    if (self != nil) {
+        _subscriber = subscriber;
+    }
+    return self;
+}
+
+- (void)onValue:(id)value {
+    _subscriber(value);
+}
+
+@end

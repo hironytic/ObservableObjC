@@ -23,56 +23,11 @@
 // THE SOFTWARE.
 //
 
-#import "Subjects.h"
+#import "OOCBehaviorSubject.h"
+#import "NSObject+ObservableObjC.h"
+#import "OOCAnonymousCancellable.h"
 #import "OOCObserverList.h"
-
-// MARK: - OOCPublishSubject
-
-@interface OOCPublishSubject ()
-@property(nonatomic, strong) OOCObserverList *observerList;
-@property(nonatomic, strong) id terminatedBy;
-
-@end
-
-@implementation OOCPublishSubject
-
-- (instancetype)init {
-    self = [super init];
-    if (self != nil) {
-        _observerList = [OOCObserverList new];
-        _terminatedBy = nil;
-    }
-    return self;
-}
-
-- (void)onValue:(id)value {
-    if (self.terminatedBy != nil) { return; }
-    
-    [self.observerList sendToAllObservers:value];
-    if ([value ooc_isTerminator]) {
-        self.terminatedBy = value;
-        [self.observerList removeAllObservers];
-    }
-}
-
-- (id<OOCCancellable>)subscribeByObserver:(id<OOCObserver>)observer {
-    if (self.terminatedBy == nil) {
-        [self.observerList addObserver:observer];
-        OOCPublishSubject * __weak weakSelf = self;
-        return [[OOCAnonymousCancellable alloc] initWithHandler:^{
-            if (weakSelf != nil && weakSelf.terminatedBy == nil) {
-                [weakSelf.observerList removeObserver:observer];
-            }
-        }];
-    } else {
-        [observer onValue:self.terminatedBy];
-        return [OOCAnonymousCancellable new];
-    }
-}
-
-@end
-
-// MARK: - OOCBehaviourSubject
+#import "OOCPublishSubject.h"
 
 @interface OOCBehaviorSubject ()
 @property(nonatomic, strong) OOCPublishSubject *publisher;

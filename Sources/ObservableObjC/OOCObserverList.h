@@ -24,7 +24,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "BasicTypes.h"
+
+@protocol OOCObserver;
 
 NS_ASSUME_NONNULL_BEGIN
 

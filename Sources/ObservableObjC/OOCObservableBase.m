@@ -1,5 +1,5 @@
 //
-//  BasicTypes.m
+// OOCObservableBase.m
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,62 +23,11 @@
 // THE SOFTWARE.
 //
 
-#import "BasicTypes.h"
+#import "OOCObservableBase.h"
+#import "OOCAnonymousCancellable.h"
+#import "OOCAnonymousObserver.h"
+#import "OOCOperator.h"
 #import "OOCPipeBuilder.h"
-
-// MARK: - OOCAnonymousObserver
-
-@interface OOCAnonymousObserver ()
-@property(nonatomic, copy) void (^subscriber)(id value);
-@end
-
-@implementation OOCAnonymousObserver
-
-- (instancetype)init {
-    return [self initWithSubscriber:^(id value) {}];
-}
-
-- (instancetype)initWithSubscriber:(void (^)(id value))subscriber {
-    self = [super init];
-    if (self != nil) {
-        _subscriber = subscriber;
-    }
-    return self;
-}
-
-- (void)onValue:(id)value {
-    _subscriber(value);
-}
-
-@end
-
-// MARK: - OOCAnonymousCancellable
-
-@interface OOCAnonymousCancellable ()
-@property(nonatomic, copy) void (^handler)(void);
-@end
-
-@implementation OOCAnonymousCancellable
-
-- (instancetype)init {
-    return [self initWithHandler:^{}];
-}
-
-- (instancetype)initWithHandler:(void (^)(void))handler {
-    self = [super init];
-    if (self != nil) {
-        _handler = handler;
-    }
-    return self;
-}
-
-- (void)cancel {
-    _handler();
-}
-
-@end
-
-// MARK: - OOCObservableBase
 
 @interface OOCObservableBase ()
 @end
@@ -104,41 +53,6 @@
 
 - (id <OOCCancellable>)subscribeByObserver:(id <OOCObserver>)observer {
     return [OOCAnonymousCancellable new];
-}
-
-@end
-
-// MARK: - OOCCompleted
-
-@implementation OOCCompleted
-
-+ (instancetype)sharedCompleted {
-    static OOCCompleted *_sharedCompleted = nil;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        _sharedCompleted = [self new];
-    });
-    return _sharedCompleted;
-}
-
-- (BOOL)isEqual:(id)object {
-    return ([object isKindOfClass:[OOCCompleted class]]);
-}
-
-- (NSUInteger)hash {
-    return 0;
-}
-
-- (NSString *)description {
-    return @"completed";
-}
-
-@end
-
-@implementation NSObject (ObservableObjC)
-
-- (BOOL)ooc_isTerminator {
-    return ([self isKindOfClass:[OOCCompleted class]] || [self isKindOfClass:[NSError class]]);
 }
 
 @end

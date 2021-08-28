@@ -1,5 +1,5 @@
 //
-// OOCPipeBuilder.h
+// OOCCompleted.m
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -23,19 +23,29 @@
 // THE SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
+#import "OOCCompleted.h"
 
-@protocol OOCOperator;
+@implementation OOCCompleted
 
-NS_ASSUME_NONNULL_BEGIN
++ (instancetype)sharedCompleted {
+    static OOCCompleted *_sharedCompleted = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        _sharedCompleted = [self new];
+    });
+    return _sharedCompleted;
+}
 
-@interface OOCPipeBuilder : NSObject
+- (BOOL)isEqual:(id)object {
+    return ([object isKindOfClass:[OOCCompleted class]]);
+}
 
-- (NSArray<id <OOCOperator>> *)build;
+- (NSUInteger)hash {
+    return 0;
+}
 
-- (void)map:(id (^)(id value))proc;
-- (void)filter:(BOOL (^)(id value))proc;
+- (NSString *)description {
+    return @"completed";
+}
 
 @end
-
-NS_ASSUME_NONNULL_END

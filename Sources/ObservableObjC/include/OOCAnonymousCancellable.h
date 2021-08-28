@@ -1,5 +1,5 @@
 //
-// OOCPipeBuilder.h
+// OOCAnonymousCancellable.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -24,18 +24,12 @@
 //
 
 #import <Foundation/Foundation.h>
-
-@protocol OOCOperator;
+#import "OOCCancellable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OOCPipeBuilder : NSObject
-
-- (NSArray<id <OOCOperator>> *)build;
-
-- (void)map:(id (^)(id value))proc;
-- (void)filter:(BOOL (^)(id value))proc;
-
+@interface OOCAnonymousCancellable : NSObject <OOCCancellable>
+- (instancetype)initWithHandler:(void (^)(void))handler;
 @end
 
 NS_ASSUME_NONNULL_END

@@ -24,6 +24,10 @@
 //
 
 #import "OOCObservables.h"
+#import "OOCAnonymousCancellable.h"
+#import "OOCCompleted.h"
+#import "OOCObservableBase.h"
+#import "OOCObserver.h"
 
 // MARK: - OOCAnonymousObservable : OOCObservableBase <OOCObservable>
 

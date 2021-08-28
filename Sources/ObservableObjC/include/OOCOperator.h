@@ -1,5 +1,5 @@
 //
-// OOCPipeBuilder.h
+// OOCOperator.h
 // 
 //
 // Copyright (c) 2021 Hironori Ichimiya <hiron@hironytic.com>
@@ -25,17 +25,12 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol OOCOperator;
+@protocol OOCObservable;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OOCPipeBuilder : NSObject
-
-- (NSArray<id <OOCOperator>> *)build;
-
-- (void)map:(id (^)(id value))proc;
-- (void)filter:(BOOL (^)(id value))proc;
-
+@protocol OOCOperator <NSObject>
+- (id <OOCObservable>)transformFrom:(id <OOCObservable>)observable;
 @end
 
 NS_ASSUME_NONNULL_END
